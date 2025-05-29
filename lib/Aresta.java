@@ -1,9 +1,11 @@
-public class Aresta<TIPO> {
+package lib;
+
+public class Aresta<T> {
     private Double peso;
-    private Vertice<TIPO> inicio;
-    private Vertice<TIPO> fim;
+    private Vertice<T> inicio;
+    private Vertice<T> fim;
     
-    public Aresta(Double peso, Vertice<TIPO> inicio, Vertice<TIPO> fim){
+    public Aresta(Double peso, Vertice<T> inicio, Vertice<T> fim){
         this.peso = peso;
         this.inicio = inicio;
         this.fim = fim;
@@ -17,19 +19,19 @@ public class Aresta<TIPO> {
         this.peso = peso;
     }
 
-    public Vertice<TIPO> getInicio() {
+    public Vertice<T> getInicio() {
         return inicio;
     }
 
-    public void setInicio(Vertice<TIPO> inicio) {
+    public void setInicio(Vertice<T> inicio) {
         this.inicio = inicio;
     }
 
-    public Vertice<TIPO> getFim() {
+    public Vertice<T> getFim() {
         return fim;
     }
 
-    public void setFim(Vertice<TIPO> fim) {
+    public void setFim(Vertice<T> fim) {
         this.fim = fim;
     }
     
