@@ -1,5 +1,5 @@
 ## 🚀 Trabalho Prático de Técnicas de Programação Avançada
-### 🧩 Etapa 1 - Biblioteca Básica
+### 🧩 Etapa 1 - Biblioteca 📚 Básica
 Neste trabalho prático, foi desenvolvido um código em Java que implementa uma **biblioteca genérica de grafos**. A biblioteca será enriquecida com a implementação de **algoritmos clássicos de grafos**. Além da biblioteca, será criado um **aplicativo que utiliza essa biblioteca de grafos** para resolver problemas práticos, demonstrando na prática a aplicação dos algoritmos desenvolvidos.
 ### 📂 O que Faz o Código
 Escrever o que o código faz. 
