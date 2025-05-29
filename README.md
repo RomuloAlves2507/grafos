@@ -2,9 +2,7 @@
 ### 🧩 Etapa 1 - Biblioteca Básica
 Neste trabalho prático, foi desenvolvido um código em Java que implementa uma **biblioteca genérica de grafos**. A biblioteca será enriquecida com a implementação de **algoritmos clássicos de grafos**. Além da biblioteca, será criado um **aplicativo que utiliza essa biblioteca de grafos** para resolver problemas práticos, demonstrando na prática a aplicação dos algoritmos desenvolvidos.
 ### 📂 O que Faz o Código
-O código lê um arquivo de entrada contendo uma lista de alunos, incluindo suas notas e matrículas. Com base nesses dados, o programa oferece um menu interativo que permite ao usuário buscar um aluno por sua matrícula, tanto em uma lista ordenada quanto em uma lista não ordenada.
-
-Essas funcionalidades são essenciais para a realização dos experimentos e análises de desempenho sugeridos no relatório do trabalho, permitindo medir os tempos de execução das operações de busca e inserção em diferentes tipos de listas.
+Escrever o que o código faz. 
 ### ⚙️ Pré-requisitos
 - Java (versão 8 ou superior)
 - Nenhuma biblioteca externa necessária (foi utilizado apenas bibliotecas padrão do Java)
