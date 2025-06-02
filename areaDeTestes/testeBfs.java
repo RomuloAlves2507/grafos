@@ -1,3 +1,4 @@
+package areaDeTestes;
 import lib.Grafo;
 import algoritmos.Bfs;
 

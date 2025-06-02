@@ -1,10 +1,11 @@
+package areaDeTestes;
 import lib.Aresta;
 import algoritmos.Dijkstra; // Import the new Dijkstra class
 import lib.Grafo;
 import lib.Vertice;
 import java.util.List;
 
-public class teste {
+public class testeDijkstra {
     public static void main(String[] args) {
         // Create a graph
         Grafo<String> meuGrafo = new Grafo<>();
