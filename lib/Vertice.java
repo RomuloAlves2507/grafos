@@ -2,15 +2,18 @@ package lib;
 
 import java.util.ArrayList;
 
-public class Vertice<T> {
+public class Vertice<T> implements Comparable<Vertice<T>> {
     private T dado;
     private ArrayList<Aresta<T>> arestasEntrada;
     private ArrayList<Aresta<T>> arestasSaida;
-    
+    public double distanciaMinima = Double.POSITIVE_INFINITY;
+    public Vertice<T> anterior; 
+
     public Vertice(T valor){
         this.dado = valor;
         this.arestasEntrada = new ArrayList<Aresta<T>>();
         this.arestasSaida = new ArrayList<Aresta<T>>();
+        this.anterior = null;
     }
 
     public T getDado() {
@@ -36,6 +39,13 @@ public class Vertice<T> {
     public ArrayList<Aresta<T>> getArestasSaida() {
         return arestasSaida;
     }
-    
-    
+
+    @Override
+    public int compareTo(Vertice<T> outroVertice) { 
+        return Double.compare(this.distanciaMinima, outroVertice.distanciaMinima);
+    }
+
+    public ArrayList<Aresta<T>> getVizinhos() {
+        return arestasSaida; 
+    }
 }

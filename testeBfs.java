@@ -1,7 +1,7 @@
 import lib.Grafo;
 import algoritmos.Bfs;
 
-public class main {
+public class testeBfs {
     
     public static void main(String[] args) {
         Grafo<String> grafo = new Grafo<String>();
