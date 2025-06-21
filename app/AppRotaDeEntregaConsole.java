@@ -1,279 +1,202 @@
-import java.util.*;
+import algoritmos.AEstrela;
+import algoritmos.BuscaEmLargura;
+import algoritmos.Dijkstra;
+import lib.Grafo;
+import lib.Localidade;
+import lib.Vertice;
 
-/**
- * Aplicação de console em Java para simular e calcular rotas de entrega ótimas
- * usando os algoritmos de grafos de Dijkstra e A* (A-Estrela).
- * A aplicação define um mapa com nós (localidades) e arestas (distâncias),
- * e então calcula o caminho mais curto entre um ponto de partida e um destino.
- * Inclui uma suíte de testes que é executada antes da demonstração principal.
- */
-public class AppRotaDeEntregaConsole {
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.StringJoiner;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
-    // --- CLASSES DE ESTRUTURA DO GRAFO (Inner classes) ---
+public class AppMenuInterativo {
 
-    static class No {
-        final String nome;
-        final int x; // Coordenada X para heurística do A*
-        final int y; // Coordenada Y para heurística do A*
-        private final List<Aresta> arestasAdjacentes = new ArrayList<>();
-        public double gScore = Double.POSITIVE_INFINITY, fScore = Double.POSITIVE_INFINITY;
-        public No pai = null;
+    // --- MÉTODOS DE CONFIGURAÇÃO DO GRAFO E EXIBIÇÃO ---
 
-        public No(String nome, int x, int y) { this.nome = nome; this.x = x; this.y = y; }
-        public void adicionarAresta(Aresta aresta) { arestasAdjacentes.add(aresta); }
-        public List<Aresta> getArestasAdjacentes() { return arestasAdjacentes; }
-        @Override public String toString() { return nome; }
-        @Override public int hashCode() { return nome.hashCode(); }
-        @Override public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            return nome.equals(((No) obj).nome);
-        }
-    }
+    private static Grafo<Localidade> criarMapaDeEntregas() {
+        // Agora usamos Generics para um grafo de Localidades
+        Grafo<Localidade> grafo = new Grafo<>();
 
-    static class Aresta {
-        final No origem;
-        final No destino;
-        final int peso;
-        public Aresta(No origem, No destino, int peso) { this.origem = origem; this.destino = destino; this.peso = peso; }
-    }
+        // Os dados dos vértices agora são objetos 'Localidade'
+        Localidade deposito = new Localidade("Depósito", 1, 5);
+        Localidade pontoA = new Localidade("Ponto A", 4, 9);
+        Localidade pontoB = new Localidade("Ponto B", 5, 2);
+        Localidade pontoC = new Localidade("Ponto C", 9, 8);
+        Localidade pontoD = new Localidade("Ponto D", 8, 3);
+        Localidade destinoFinal = new Localidade("Destino Final", 13, 6);
 
-    static class Grafo {
-        private final Set<No> nos = new HashSet<>();
-        public void adicionarNo(No no) { nos.add(no); }
-        public Set<No> getNos() { return nos; }
-    }
-    
-    static class ResultadoRota {
-        final List<No> caminho;
-        final double distancia;
-        public ResultadoRota(List<No> caminho, double distancia) { this.caminho = caminho; this.distancia = distancia; }
-    }
+        // O grafo agora gerencia a adição de vértices internamente
+        grafo.adicionarVertice(deposito);
+        grafo.adicionarVertice(pontoA);
+        grafo.adicionarVertice(pontoB);
+        grafo.adicionarVertice(pontoC);
+        grafo.adicionarVertice(pontoD);
+        grafo.adicionarVertice(destinoFinal);
 
-    // --- IMPLEMENTAÇÃO DOS ALGORITMOS ---
-
-    static class Dijkstra {
-        public static ResultadoRota encontrarCaminhoMaisCurto(Grafo grafo, No inicio, No fim) {
-            Map<No, Double> distancias = new HashMap<>();
-            Map<No, No> pais = new HashMap<>();
-            PriorityQueue<No> filaPrioridade = new PriorityQueue<>(Comparator.comparingDouble(distancias::get));
-            Set<No> visitados = new HashSet<>();
-            for (No no : grafo.getNos()) distancias.put(no, Double.POSITIVE_INFINITY);
-            distancias.put(inicio, 0.0);
-            filaPrioridade.add(inicio);
-            while (!filaPrioridade.isEmpty()) {
-                No noAtual = filaPrioridade.poll();
-                if (noAtual.equals(fim)) return new ResultadoRota(reconstruirCaminho(pais, fim), distancias.get(fim));
-                if (visitados.contains(noAtual)) continue;
-                visitados.add(noAtual);
-                for (Aresta aresta : noAtual.getArestasAdjacentes()) {
-                    No vizinho = aresta.destino;
-                    if (!visitados.contains(vizinho)) {
-                        double novaDistancia = distancias.get(noAtual) + aresta.peso;
-                        if (novaDistancia < distancias.get(vizinho)) {
-                            distancias.put(vizinho, novaDistancia);
-                            pais.put(vizinho, noAtual);
-                            filaPrioridade.remove(vizinho);
-                            filaPrioridade.add(vizinho);
-                        }
-                    }
-                }
-            }
-            return new ResultadoRota(Collections.emptyList(), -1);
-        }
-    }
-    
-    static class AEstrela {
-        private static double heuristica(No no1, No no2) {
-            return Math.sqrt(Math.pow(no1.x - no2.x, 2) + Math.pow(no1.y - no2.y, 2));
-        }
-        public static ResultadoRota encontrarCaminhoMaisCurto(Grafo grafo, No inicio, No fim) {
-            for (No no : grafo.getNos()) {
-                no.gScore = Double.POSITIVE_INFINITY;
-                no.fScore = Double.POSITIVE_INFINITY;
-                no.pai = null;
-            }
-            inicio.gScore = 0;
-            inicio.fScore = heuristica(inicio, fim);
-            PriorityQueue<No> conjuntoAberto = new PriorityQueue<>(Comparator.comparingDouble(n -> n.fScore));
-            conjuntoAberto.add(inicio);
-            while (!conjuntoAberto.isEmpty()) {
-                No noAtual = conjuntoAberto.poll();
-                if (noAtual.equals(fim)) return new ResultadoRota(reconstruirCaminhoAEstrela(fim), noAtual.gScore);
-                for (Aresta aresta : noAtual.getArestasAdjacentes()) {
-                    No vizinho = aresta.destino;
-                    double gScoreTentativo = noAtual.gScore + aresta.peso;
-                    if (gScoreTentativo < vizinho.gScore) {
-                        vizinho.pai = noAtual;
-                        vizinho.gScore = gScoreTentativo;
-                        vizinho.fScore = vizinho.gScore + heuristica(vizinho, fim);
-                        if (!conjuntoAberto.contains(vizinho)) conjuntoAberto.add(vizinho);
-                    }
-                }
-            }
-            return new ResultadoRota(Collections.emptyList(), -1);
-        }
-    }
-
-    // --- SUÍTE DE TESTES ---
-
-    static class TestRunner {
-        public static void runAllTests() {
-            System.out.println("--- INICIANDO SUÍTE DE TESTES ---");
-            testCaminhoOtimo();
-            testCaminhoInexistente();
-            testCaminhoSimples();
-            System.out.println("\n--- TESTES CONCLUÍDOS ---");
-        }
-
-        private static void testCaminhoOtimo() {
-            Grafo grafo = criarGrafoParaTeste();
-            No inicio = obterNoPeloNome(grafo, "Depósito");
-            No fim = obterNoPeloNome(grafo, "Destino Final");
-            
-            double distanciaEsperada = 10.0;
-            List<String> caminhoEsperado = Arrays.asList("Depósito", "Ponto B", "Ponto D", "Destino Final");
-
-            ResultadoRota resultadoDijkstra = Dijkstra.encontrarCaminhoMaisCurto(grafo, inicio, fim);
-            assert resultadoDijkstra.distancia == distanciaEsperada : "Teste Dijkstra falhou: Distância incorreta.";
-            assert converterParaNomes(resultadoDijkstra.caminho).equals(caminhoEsperado) : "Teste Dijkstra falhou: Caminho incorreto.";
-
-            ResultadoRota resultadoAEstrela = AEstrela.encontrarCaminhoMaisCurto(grafo, inicio, fim);
-            assert resultadoAEstrela.distancia == distanciaEsperada : "Teste A* falhou: Distância incorreta.";
-            assert converterParaNomes(resultadoAEstrela.caminho).equals(caminhoEsperado) : "Teste A* falhou: Caminho incorreto.";
-
-            System.out.println("OK - Teste de Caminho Ótimo passou.");
-        }
+        // Adicionando arestas bidirecionais
+        adicionarArestaBidirecional(grafo, deposito, pontoA, 5);
+        adicionarArestaBidirecional(grafo, deposito, pontoB, 4);
+        adicionarArestaBidirecional(grafo, pontoA, pontoC, 4);
+        adicionarArestaBidirecional(grafo, pontoA, pontoB, 3);
+        adicionarArestaBidirecional(grafo, pontoB, pontoD, 2);
+        adicionarArestaBidirecional(grafo, pontoC, destinoFinal, 3);
+        adicionarArestaBidirecional(grafo, pontoD, destinoFinal, 4);
+        adicionarArestaBidirecional(grafo, pontoD, pontoC, 6);
         
-        private static void testCaminhoInexistente() {
-            Grafo grafo = criarGrafoParaTeste();
-            No inicio = obterNoPeloNome(grafo, "Depósito");
-            No noIsolado = new No("Isolado", 20, 20);
-            grafo.adicionarNo(noIsolado);
-
-            ResultadoRota resultado = Dijkstra.encontrarCaminhoMaisCurto(grafo, inicio, noIsolado);
-            assert resultado.caminho.isEmpty() : "Teste de Caminho Inexistente falhou: Um caminho foi encontrado.";
-            
-            System.out.println("OK - Teste de Caminho Inexistente passou.");
-        }
-
-        private static void testCaminhoSimples() {
-            Grafo grafo = new Grafo();
-            No a = new No("A", 0, 0);
-            No b = new No("B", 1, 0);
-            adicionarArestaBidirecional(a, b, 7);
-            grafo.adicionarNo(a);
-            grafo.adicionarNo(b);
-
-            ResultadoRota resultado = AEstrela.encontrarCaminhoMaisCurto(grafo, a, b);
-            assert resultado.distancia == 7.0 : "Teste de Caminho Simples falhou: Distância incorreta.";
-            assert converterParaNomes(resultado.caminho).equals(Arrays.asList("A", "B")) : "Teste de Caminho Simples falhou: Caminho incorreto.";
-
-            System.out.println("OK - Teste de Caminho Simples passou.");
-        }
-    }
-    
-    // --- MÉTODOS AUXILIARES ---
-
-    private static List<No> reconstruirCaminho(Map<No, No> pais, No fim) {
-        LinkedList<No> caminho = new LinkedList<>();
-        for (No passo = fim; passo != null; passo = pais.get(passo)) caminho.addFirst(passo);
-        return caminho;
-    }
-    private static List<No> reconstruirCaminhoAEstrela(No fim) {
-        LinkedList<No> caminho = new LinkedList<>();
-        for (No passo = fim; passo != null; passo = passo.pai) caminho.addFirst(passo);
-        return caminho;
-    }
-    
-    private static void adicionarArestaBidirecional(No u, No v, int p) {
-        u.adicionarAresta(new Aresta(u, v, p));
-        v.adicionarAresta(new Aresta(v, u, p));
-    }
-    
-    private static No obterNoPeloNome(Grafo g, String n) {
-        return g.getNos().stream().filter(no -> no.nome.equals(n)).findFirst().orElse(null);
-    }
-    
-    private static List<String> converterParaNomes(List<No> caminho) {
-        List<String> nomes = new ArrayList<>();
-        for(No no : caminho) nomes.add(no.nome);
-        return nomes;
-    }
-
-    private static Grafo criarGrafoParaTeste() {
-        Grafo grafo = new Grafo();
-        No deposito = new No("Depósito", 1, 5);
-        No pontoA = new No("Ponto A", 4, 9);
-        No pontoB = new No("Ponto B", 5, 2);
-        No pontoC = new No("Ponto C", 9, 8);
-        No pontoD = new No("Ponto D", 8, 3);
-        No destinoFinal = new No("Destino Final", 13, 6);
-        adicionarArestaBidirecional(deposito, pontoA, 5);
-        adicionarArestaBidirecional(deposito, pontoB, 4);
-        adicionarArestaBidirecional(pontoA, pontoC, 4);
-        adicionarArestaBidirecional(pontoA, pontoB, 3);
-        adicionarArestaBidirecional(pontoB, pontoD, 2);
-        adicionarArestaBidirecional(pontoC, destinoFinal, 3);
-        adicionarArestaBidirecional(pontoD, destinoFinal, 4);
-        adicionarArestaBidirecional(pontoD, pontoC, 6);
-        Collections.addAll(grafo.getNos(), deposito, pontoA, pontoB, pontoC, pontoD, destinoFinal);
         return grafo;
     }
-    
-    private static void imprimirResultado(String algoritmo, ResultadoRota resultado, long tempoExecucao) {
-        if (resultado.caminho.isEmpty()) {
+
+    // Adaptado para usar a nova estrutura
+    private static void adicionarArestaBidirecional(Grafo<Localidade> grafo, Localidade u, Localidade v, double peso) {
+        grafo.adicionarAresta(peso, u, v);
+        grafo.adicionarAresta(peso, v, u);
+    }
+
+    // Adaptado para receber a nova estrutura de resultados
+    private static void imprimirResultado(String algoritmo, List<Vertice<Localidade>> caminho, double distancia, long tempoExecucao) {
+        System.out.println("\n--- RESULTADO ---");
+        if (caminho == null || caminho.isEmpty()) {
             System.out.println("Não foi possível encontrar um caminho com o algoritmo " + algoritmo + ".");
         } else {
             System.out.println("Rota encontrada com " + algoritmo + ":");
             StringJoiner sj = new StringJoiner(" -> ");
-            for (No no : resultado.caminho) {
-                sj.add(no.nome);
-            }
-            System.out.println("Caminho: " + sj.toString());
-            System.out.printf("Distância Total: %.0f\n", resultado.distancia);
-            System.out.printf("Tempo de Execução: %.4f ms\n", tempoExecucao / 1_000_000.0);
+            caminho.forEach(vertice -> sj.add(vertice.getDado().getNome()));
+            
+            System.out.println("  Caminho: " + sj.toString());
+            System.out.printf("  Distância Total: %.1f\n", distancia);
+            System.out.printf("  Tempo de Execução: %.4f ms\n", tempoExecucao / 1_000_000.0);
         }
+        System.out.println("-----------------");
+    }
+    
+    // Função auxiliar para calcular a distância de um caminho retornado (A* e BFS)
+    private static double calcularDistanciaCaminho(List<Vertice<Localidade>> caminho) {
+        double distancia = 0.0;
+        if (caminho == null || caminho.size() < 2) {
+            return 0.0;
+        }
+        for (int i = 0; i < caminho.size() - 1; i++) {
+            Vertice<Localidade> atual = caminho.get(i);
+            Vertice<Localidade> proximo = caminho.get(i + 1);
+            // Encontra a aresta que liga 'atual' a 'proximo' para somar o peso
+            distancia += atual.getArestasSaida().stream()
+                .filter(aresta -> aresta.getFim().equals(proximo))
+                .mapToDouble(aresta -> aresta.getPeso())
+                .findFirst()
+                .orElse(0.0);
+        }
+        return distancia;
     }
 
-    // --- MÉTODO PRINCIPAL ---
-    
+    // --- LÓGICA DO MENU INTERATIVO ---
+
+    private static void mostrarMenu() {
+        System.out.println("\n==============================================");
+        System.out.println("   CALCULADORA DE ROTAS DE ENTREGA");
+        System.out.println("==============================================");
+        System.out.println("Escolha o algoritmo para encontrar o caminho:");
+        System.out.println("  1. Dijkstra (Garante o caminho mais curto por peso)");
+        System.out.println("  2. A* (A-Estrela) (Otimizado com heurística)");
+        System.out.println("  3. Busca em Largura (BFS) (Caminho mais curto por paradas)");
+        System.out.println("  4. Sair");
+        System.out.println("----------------------------------------------");
+    }
+
+    private static Vertice<Localidade> obterPontoDoUsuario(Grafo<Localidade> grafo, Scanner scanner, String tipoPonto) {
+        Vertice<Localidade> vertice = null;
+        while (vertice == null) {
+            System.out.print("Digite o nome do ponto de " + tipoPonto + ": ");
+            String nomePonto = scanner.nextLine();
+            // Busca o vértice cujo dado (Localidade) tem o nome correspondente
+            vertice = grafo.getVertices().stream()
+                .filter(v -> v.getDado().getNome().equalsIgnoreCase(nomePonto))
+                .findFirst()
+                .orElse(null);
+            
+            if (vertice == null) {
+                System.out.println("Ponto '" + nomePonto + "' não encontrado. Tente novamente.");
+            }
+        }
+        return vertice;
+    }
+
     public static void main(String[] args) {
-        // 1. Executa os testes primeiro.
-        try {
-            TestRunner.runAllTests();
-            System.out.println("\nTodos os testes passaram com sucesso! Executando a demonstração no console...");
-        } catch (AssertionError e) {
-            System.err.println("\n!!! UM TESTE FALHOU: " + e.getMessage());
-            System.err.println("!!! A demonstração não será executada devido a falha no teste.");
-            return;
+        Grafo<Localidade> mapa = criarMapaDeEntregas();
+        Scanner scanner = new Scanner(System.in);
+
+        // --- Definindo a heurística para o A* ---
+        BiFunction<Vertice<Localidade>, Vertice<Localidade>, Double> heuristica = (v1, v2) -> {
+            Localidade p1 = v1.getDado();
+            Localidade p2 = v2.getDado();
+            return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
+        };
+        // Instanciando os algoritmos
+        Dijkstra<Localidade> dijkstra = new Dijkstra<>();
+        AEstrela<Localidade> aEstrela = new AEstrela<>(heuristica);
+        BuscaEmLargura<Localidade> bfs = new BuscaEmLargura<>();
+
+        while (true) {
+            mostrarMenu();
+            System.out.print("Digite sua opção: ");
+            String escolha = scanner.nextLine();
+            
+            if (escolha.equals("4")) {
+                System.out.println("Saindo do programa. Até mais!");
+                break;
+            }
+
+            if (!Arrays.asList("1", "2", "3").contains(escolha)) {
+                System.out.println("Opção inválida. Por favor, escolha de 1 a 4.");
+                continue;
+            }
+            
+            System.out.println("\nPontos disponíveis no mapa:");
+            String localidadesDisponiveis = mapa.getVertices().stream()
+                .map(v -> v.getDado().getNome())
+                .collect(Collectors.joining(" | "));
+            System.out.println(localidadesDisponiveis + "\n");
+            
+            Vertice<Localidade> inicio = obterPontoDoUsuario(mapa, scanner, "PARTIDA");
+            Vertice<Localidade> fim = obterPontoDoUsuario(mapa, scanner, "DESTINO");
+
+            List<Vertice<Localidade>> caminho = null;
+            double distancia = 0.0;
+            String nomeAlgoritmo = "";
+            
+            long tempoInicio = System.nanoTime();
+
+            switch (escolha) {
+                case "1":
+                    nomeAlgoritmo = "Dijkstra";
+                    // Nova forma de chamar o Dijkstra
+                    dijkstra.executar(mapa, inicio.getDado());
+                    caminho = dijkstra.getMenorCaminho(fim);
+                    distancia = dijkstra.getDistancia(fim);
+                    break;
+                case "2":
+                    nomeAlgoritmo = "A*";
+                    // Nova forma de chamar o A*
+                    caminho = aEstrela.encontrarCaminhoMaisCurto(mapa, inicio, fim);
+                    distancia = calcularDistanciaCaminho(caminho);
+                    break;
+                case "3":
+                    nomeAlgoritmo = "Busca em Largura (BFS)";
+                    // Nova forma de chamar o BFS
+                    caminho = bfs.encontrarCaminho(mapa, inicio.getDado(), fim.getDado());
+                    distancia = calcularDistanciaCaminho(caminho);
+                    break;
+            }
+            
+            long tempoFim = System.nanoTime();
+            imprimirResultado(nomeAlgoritmo, caminho, distancia, (tempoFim - tempoInicio));
+
+            System.out.print("\nPressione Enter para voltar ao menu...");
+            scanner.nextLine();
         }
 
-        // 2. Executa a demonstração principal no console.
-        System.out.println("----------------------------------------------------------\n");
-        Grafo grafo = criarGrafoParaTeste();
-        No deposito = obterNoPeloNome(grafo, "Depósito");
-        No destinoFinal = obterNoPeloNome(grafo, "Destino Final");
-
-        System.out.println("Calculando a melhor rota de '" + deposito.nome + "' para '" + destinoFinal.nome + "'...");
-        System.out.println("\n----------------------------------------------------------\n");
-
-        // Executar Dijkstra
-        System.out.println("--- Executando Algoritmo de Dijkstra ---");
-        long inicioDijkstra = System.nanoTime();
-        ResultadoRota resultadoDijkstra = Dijkstra.encontrarCaminhoMaisCurto(grafo, deposito, destinoFinal);
-        long fimDijkstra = System.nanoTime();
-        imprimirResultado("Dijkstra", resultadoDijkstra, (fimDijkstra - inicioDijkstra));
-        
-        System.out.println("\n----------------------------------------------------------\n");
-
-        // Executar A*
-        System.out.println("--- Executando Algoritmo A* (A-Estrela) ---");
-        long inicioAEstrela = System.nanoTime();
-        ResultadoRota resultadoAEstrela = AEstrela.encontrarCaminhoMaisCurto(grafo, deposito, destinoFinal);
-        long fimAEstrela = System.nanoTime();
-        imprimirResultado("A*", resultadoAEstrela, (fimAEstrela - inicioAEstrela));
-
-        System.out.println("\n----------------------------------------------------------");
+        scanner.close();
     }
 }
