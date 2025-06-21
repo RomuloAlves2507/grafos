@@ -135,7 +135,7 @@ public class AppMenuInterativo {
         };
         // Instanciando os algoritmos
         Dijkstra<Localidade> dijkstra = new Dijkstra<>();
-        AEstrela<Localidade> aEstrela = new AEstrela<>();
+        AEstrela<Localidade> aEstrela = new AEstrela<Localidade>(heuristica);
         BuscaEmLargura<Localidade> bfs = new BuscaEmLargura<>();
 
         while (true) {

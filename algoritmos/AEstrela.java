@@ -12,8 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class AEstrela<T> {
+    private BiFunction<Vertice<T>, Vertice<T>, Double> heuristica;
+
+    public AEstrela(BiFunction<Vertice<T>, Vertice<T>, Double> heuristica) {
+        this.heuristica = heuristica;
+    }
 
     public List<Vertice<T>> encontrarCaminhoMaisCurto(Grafo<T> grafo, Vertice<T> inicio, Vertice<T> objetivo) {
         // gScore: Custo do inicio até o nó atual
