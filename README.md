@@ -39,8 +39,8 @@ Neste projeto desenvolvemos **duas peças principais**:
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/alliciarocha/trabTPA.git
-cd trabTPA
+git clone https://github.com/RomuloAlves2507/grafos.git
+cd grafos
 
 # 2. Compile todas as classes
 javac -d out src/**/*.java
@@ -55,32 +55,16 @@ javac -d out src/**/*.java
 java -cp out Main
 ```
 
-> 📝 **Dica:** Ajuste o arquivo `config.json` para trocar mapas ou algoritmos em tempo de execução.
-
----
-
-### 🧪 Testes & Experimentação
-
-1. **Insira** vértices/arestas ou carregue um mapa de exemplo.
-2. **Escolha** o algoritmo desejado (Dijkstra, A★ ou BFS).
-3. **Observe** o caminho retornado e o custo → compare tempos de execução para seus relatórios de complexidade.
-
 ---
 
 ### 🔍 Estrutura de Pastas
 
 ```
-trabTPA/
-├── src/             # Código‑fonte Java
-├── data/            # Mapas de exemplo (CSV/JSON)
-├── out/             # Arquivos .class (gerado após compilação)
+grafos/
+├── algoritmos/             # Algoritmos 
+├── app/            # Implementação do Aplicativo de Entregas
+├── lib/             # Biblioteca
 └── README.md
 ```
-
----
-
-### 📜 Licença
-
-Distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para detalhes.
 
 ---
