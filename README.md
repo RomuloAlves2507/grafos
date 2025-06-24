@@ -71,7 +71,7 @@ grafos/
 ### 📝 Etapa 4 - Confecção do relatório sobre grafos
 A seguir, está disponível o link para acesso ao relatório desenvolvido sobre grafos, contendo as conclusões obtidas a partir dos testes realizados:
 * 👉 [Relatório Grafos - Allicia Rocha, Romulo Alves, Vitor Nascimento](https://docs.google.com/document/d/1fzEThERj6EUU_T_2Or5LaLBdmrZt5ka-m_gsTPccHQU/edit?usp=sharing)
-* 
+  
 ---
 
 ### ✒️ Autores
